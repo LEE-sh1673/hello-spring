@@ -16,6 +16,10 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import hello.hellospring.domain.Member;
 
 public class JdbcMemberRepository implements MemberRepository {
+	private static final String INSERT_EXPR =  "insert into member(name) values(?)";
+	private static final String FIND_BY_ID_EXPR = "select * from member where id = ?";
+	private static final String FIND_BY_NAME_EXPR = "select * from member where name = ?";
+	private static final String FIND_ALL_EXPR = "select * from member";
 	private final DataSource dataSource;
 
 	public JdbcMemberRepository(DataSource dataSource) {
@@ -24,19 +28,20 @@ public class JdbcMemberRepository implements MemberRepository {
 
 	@Override
 	public Member save(Member member) {
-		String sql = "insert into member(name) values(?)";
-
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
 		try {
 			conn = getConnection();
-			pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			pstmt = conn.prepareStatement(INSERT_EXPR, Statement.RETURN_GENERATED_KEYS);
 
 			pstmt.setString(1, member.getName());
 
+			// execute sql expression
 			pstmt.executeUpdate();
+
+			// return generated-key from database
 			rs = pstmt.getGeneratedKeys();
 
 			if (rs.next()) {
@@ -54,15 +59,13 @@ public class JdbcMemberRepository implements MemberRepository {
 
 	@Override
 	public Optional<Member> findById(Long id) {
-		String sql = "select * from member where id = ?";
-
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
 		try {
 			conn = getConnection();
-			pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(FIND_BY_ID_EXPR);
 			pstmt.setLong(1, id);
 
 			rs = pstmt.executeQuery();
@@ -84,15 +87,13 @@ public class JdbcMemberRepository implements MemberRepository {
 
 	@Override
 	public List<Member> findAll() {
-		String sql = "select * from member";
-
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
 		try {
 			conn = getConnection();
-			pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(FIND_ALL_EXPR);
 			rs = pstmt.executeQuery();
 			List<Member> members = new ArrayList<>();
 
@@ -112,15 +113,13 @@ public class JdbcMemberRepository implements MemberRepository {
 
 	@Override
 	public Optional<Member> findByName(String name) {
-		String sql = "select * from member where name = ?";
-
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
 		try {
 			conn = getConnection();
-			pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(FIND_BY_NAME_EXPR);
 			pstmt.setString(1, name);
 			rs = pstmt.executeQuery();
 
@@ -151,6 +150,7 @@ public class JdbcMemberRepository implements MemberRepository {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
 		try {
 			if (pstmt != null) {
 				pstmt.close();
@@ -158,6 +158,7 @@ public class JdbcMemberRepository implements MemberRepository {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
 		try {
 			if (conn != null) {
 				close(conn);
