@@ -3,11 +3,25 @@ package hello.hellospring.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import hello.hellospring.domain.Member;
 import hello.hellospring.repository.MemberRepository;
 
+@Transactional
 public class MemberService {
+    /*
+    	import org.springframework.transaction.annotation.Transactional;
+    	-> 테스트 코드와 비지니스 로직 간의 차이점.
 
+    	@Transactional은 기본적으로 해당 메서드가 실행될 때 트랜잭션을 시작하고
+    	해당 메서드가 끝날 때 커밋을 해서 데이터베이스에 전달된 내용을 확정합니다.
+
+		그런데 테스트 코드에서 @Transactional을 사용하면 커밋을 하는게 아니라
+		데이터베이스에 롤백을 해서 데이터베이스에 전달된 데이터를 모두 삭제됩니다.
+
+		[출처: https://www.inflearn.com/questions/112512]
+     */
 	private final MemberRepository memberRepository;
 
 	public MemberService(MemberRepository memberRepository) {
